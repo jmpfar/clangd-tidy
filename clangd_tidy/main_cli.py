@@ -9,13 +9,14 @@ from urllib.parse import unquote, urlparse
 
 import cattrs
 
-from .args import parse_args, SEVERITY_INT
+from .args import SEVERITY_INT, parse_args
 from .diagnostic_formatter import (
     CompactDiagnosticFormatter,
     DiagnosticCollection,
     FancyDiagnosticFormatter,
     GithubActionWorkflowCommandDiagnosticFormatter,
 )
+from .lines_filter import LineFilter
 from .lsp import ClangdAsync, RequestResponsePair
 from .lsp.messages import (
     Diagnostic,
@@ -162,6 +163,8 @@ def main_cli():
         tqdm=args.tqdm,
         max_pending_requests=args.jobs * 2,
     ).acquire_diagnostics()
+
+    file_diagnostics = args.line_filter.filter_all_diagnostics(file_diagnostics)
 
     formatter = (
         FancyDiagnosticFormatter(
